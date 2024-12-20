@@ -9,7 +9,9 @@ import ru.hh.school.unittesting.homework.LibraryManager;
 import ru.hh.school.unittesting.homework.NotificationService;
 import ru.hh.school.unittesting.homework.UserService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class LibraryManagerTest {
@@ -30,5 +32,18 @@ public class LibraryManagerTest {
 
     libraryManager.addBook("book1", 3);
     assertEquals(8, libraryManager.getAvailableCopies("book1"));
+  }
+
+
+  @Test
+  void testBorrowBookSuccessfully() {
+    when(userService.isUserActive("user1")).thenReturn(true);
+    libraryManager.addBook("book1", 5);
+
+    boolean result = libraryManager.borrowBook("book1", "user1");
+
+    assertTrue(result);
+    assertEquals(4, libraryManager.getAvailableCopies("book1"));
+    verify(notificationService).notifyUser("user1", "You have borrowed the book: book1");
   }
 }
