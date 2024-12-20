@@ -46,4 +46,14 @@ public class LibraryManagerTest {
     assertEquals(4, libraryManager.getAvailableCopies("book1"));
     verify(notificationService).notifyUser("user1", "You have borrowed the book: book1");
   }
+
+  @Test
+  void testBorrowBookWhenUserInactive() {
+    when(userService.isUserActive("user1")).thenReturn(false);
+
+    boolean result = libraryManager.borrowBook("book1", "user1");
+
+    assertFalse(result);
+    verify(notificationService).notifyUser("user1", "Your account is not active.");
+  }
 }
