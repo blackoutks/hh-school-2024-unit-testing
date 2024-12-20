@@ -88,6 +88,16 @@ public class LibraryManagerTest {
   }
 
   @Test
+  void testCalculateDynamicLateFeeThrowsExceptionForNegativeDays() {
+    IllegalArgumentException exception = assertThrows(
+        IllegalArgumentException.class,
+        () -> libraryManager.calculateDynamicLateFee(-1, false, false)
+    );
+
+    assertEquals("Overdue days cannot be negative.", exception.getMessage());
+  }
+
+  @Test
   void testCalculateDynamicLateFeeWithoutPremiumOrBestseller() {
     double fee = libraryManager.calculateDynamicLateFee(6, false, false);
     assertEquals(3, fee);
