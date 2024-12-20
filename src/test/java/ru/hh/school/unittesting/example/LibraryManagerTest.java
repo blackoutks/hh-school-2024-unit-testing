@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hh.school.unittesting.homework.LibraryManager;
 import ru.hh.school.unittesting.homework.NotificationService;
 import ru.hh.school.unittesting.homework.UserService;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,5 +85,29 @@ public class LibraryManagerTest {
     boolean result = libraryManager.returnBook("book2", "user2");
 
     assertFalse(result);
+  }
+
+  @Test
+  void testCalculateDynamicLateFeeWithoutPremiumOrBestseller() {
+    double fee = libraryManager.calculateDynamicLateFee(6, false, false);
+    assertEquals(3, fee);
+  }
+
+  @Test
+  void testCalculateDynamicLateFeeWithBestseller() {
+    double fee = libraryManager.calculateDynamicLateFee(6, true, false);
+    assertEquals(4.5, fee); // 6 * 0.5 * 1.5
+  }
+
+  @Test
+  void testCalculateDynamicLateFeeWithPremiumMember() {
+    double fee = libraryManager.calculateDynamicLateFee(6, false, true);
+    assertEquals(2.4, fee); // 6 * 0.5 * 0.8
+  }
+
+  @Test
+  void testCalculateDynamicLateFeeWithBestsellerAndPremiumMember() {
+    double fee = libraryManager.calculateDynamicLateFee(6, true, true);
+    assertEquals(3.6, fee); // (6 * 0.5 * 1.5) * 0.8
   }
 }
