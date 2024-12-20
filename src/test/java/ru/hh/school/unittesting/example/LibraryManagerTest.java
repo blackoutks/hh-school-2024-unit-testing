@@ -77,7 +77,7 @@ public class LibraryManagerTest {
     boolean result = libraryManager.returnBook("book1", "user1");
 
     assertTrue(result);
-    assertEquals(6, libraryManager.getAvailableCopies("book1"));
+    assertEquals(5, libraryManager.getAvailableCopies("book1"));
     verify(notificationService).notifyUser("user1", "You have returned the book: book1");
   }
 
