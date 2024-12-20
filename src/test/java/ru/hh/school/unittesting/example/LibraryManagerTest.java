@@ -81,4 +81,10 @@ public class LibraryManagerTest {
     verify(notificationService).notifyUser("user1", "You have returned the book: book1");
   }
 
+  @Test
+  void testReturnBookNotBorrowed() {
+    boolean result = libraryManager.returnBook("book2", "user2");
+
+    assertFalse(result);
+  }
 }
