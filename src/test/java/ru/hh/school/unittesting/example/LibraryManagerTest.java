@@ -68,6 +68,17 @@ public class LibraryManagerTest {
     assertEquals(0, libraryManager.getAvailableCopies("book1"));
   }
 
+  @Test
+  void testReturnBookSuccessfully() {
+    when(userService.isUserActive("user1")).thenReturn(true);
+    libraryManager.addBook("book1", 5);
+    libraryManager.borrowBook("book1", "user1");
 
+    boolean result = libraryManager.returnBook("book1", "user1");
+
+    assertTrue(result);
+    assertEquals(6, libraryManager.getAvailableCopies("book1"));
+    verify(notificationService).notifyUser("user1", "You have returned the book: book1");
+  }
 
 }
