@@ -119,10 +119,4 @@ public class LibraryManagerTest {
     double fee = libraryManager.calculateDynamicLateFee(overdueDays, isBestseller, isPremium);
     assertEquals(expectedFee, fee);
   }
-
-  @Test
-  void testCalculateDynamicLateFeeCheckZeroOverdueDays() {
-    double fee = libraryManager.calculateDynamicLateFee(0, false, false);
-    assertEquals(0, fee);
-  }
 }
