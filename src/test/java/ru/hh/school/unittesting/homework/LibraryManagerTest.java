@@ -1,13 +1,13 @@
-package ru.hh.school.unittesting.example;
+package ru.hh.school.unittesting.homework;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.hh.school.unittesting.homework.LibraryManager;
-import ru.hh.school.unittesting.homework.NotificationService;
-import ru.hh.school.unittesting.homework.UserService;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +32,6 @@ public class LibraryManagerTest {
     libraryManager.addBook("book1", 3);
     assertEquals(8, libraryManager.getAvailableCopies("book1"));
   }
-
 
   @Test
   void testBorrowBookSuccessfully() {
@@ -88,6 +87,17 @@ public class LibraryManagerTest {
   }
 
   @Test
+  void testReturnBookNotBorrowedThisUser() {
+    when(userService.isUserActive("user1")).thenReturn(true);
+    libraryManager.addBook("book1", 5);
+    libraryManager.borrowBook("book1", "user1");
+
+    boolean result = libraryManager.returnBook("book1", "user2");
+
+    assertFalse(result);
+  }
+
+  @Test
   void testCalculateDynamicLateFeeThrowsExceptionForNegativeDays() {
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
@@ -97,27 +107,22 @@ public class LibraryManagerTest {
     assertEquals("Overdue days cannot be negative.", exception.getMessage());
   }
 
-  @Test
-  void testCalculateDynamicLateFeeWithoutPremiumOrBestseller() {
-    double fee = libraryManager.calculateDynamicLateFee(6, false, false);
-    assertEquals(3, fee);
+  @ParameterizedTest
+  @CsvSource({
+      "0, 0, false, false", // просрочка 0 дней, задолженность 0
+      "6, 3, false, false", // просрочка 6 дней, задолженность 3 (6*0.5)
+      "6, 4.5, true, false", // просрочка 6 дней, задолженность 4.5 (6 * 0.5 * 1.5)
+      "6, 2.4, false, true", // просрочка 6 дней, задолженность 2.4 (6 * 0.5 * 0.8)
+      "6, 3.6, true, true" // просрочка 6 дней, задолженность 3.6 (6 * 0.5 * 1.5) * 0.8)
+  })
+  void testCalculateDynamicLateFee(int overdueDays, double expectedFee, boolean isBestseller, boolean isPremium) {
+    double fee = libraryManager.calculateDynamicLateFee(overdueDays, isBestseller, isPremium);
+    assertEquals(expectedFee, fee);
   }
 
   @Test
-  void testCalculateDynamicLateFeeWithBestseller() {
-    double fee = libraryManager.calculateDynamicLateFee(6, true, false);
-    assertEquals(4.5, fee); // 6 * 0.5 * 1.5
-  }
-
-  @Test
-  void testCalculateDynamicLateFeeWithPremiumMember() {
-    double fee = libraryManager.calculateDynamicLateFee(6, false, true);
-    assertEquals(2.4, fee); // 6 * 0.5 * 0.8
-  }
-
-  @Test
-  void testCalculateDynamicLateFeeWithBestsellerAndPremiumMember() {
-    double fee = libraryManager.calculateDynamicLateFee(6, true, true);
-    assertEquals(3.6, fee); // (6 * 0.5 * 1.5) * 0.8
+  void testCalculateDynamicLateFeeCheckZeroOverdueDays() {
+    double fee = libraryManager.calculateDynamicLateFee(0, false, false);
+    assertEquals(0, fee);
   }
 }
